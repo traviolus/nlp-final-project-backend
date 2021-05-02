@@ -4,6 +4,7 @@ from pythainlp.tokenize import word_tokenize
 import numpy as np
 import pandas as pd
 import pickle
+import deepcut
 
 
 class DataTools:
@@ -51,7 +52,7 @@ class DataTools:
 
     @staticmethod
     def gen_sent(seed_text, model_obj):
-        sentence = word_tokenize(seed_text , engine="newmm")
+        sentence = deepcut.tokenize(seed_text)
         gen_max_length = 30
         while True:
             x = pad_sequences([[model_obj.word_to_index[word] for word in sentence]], maxlen=5)
@@ -65,8 +66,8 @@ class DataTools:
 
 
 class DinosaturdayModel:
-    def __init__(self):
-        self.model = load_model('../model_files/dinosad_gen_LSTM_final.h5')
+    def __init__(self, model_path):
+        self.model = load_model(model_path)
         self.vocab_path = '../model_files/dinosaturday_vocab.pkl'
         self.word_to_index = dict()
         self.index_to_word = dict()
@@ -113,25 +114,18 @@ class QuoteModel:
     def __init__(self):
         index_to_word, word_to_index, vocab_size = self.get_word_and_index()
 
-        self.model = load_model('../model_files/kamkom_112e.keras')
+        self.model = load_model('../model_files/kamkom_97e.keras')
         self.word_to_index = word_to_index
         self.index_to_word = index_to_word
 
     def get_word_and_index(self):
-        with open('../model_files/tokenized_sequences.pickle', 'rb') as f:
-            sequences = pickle.load(f)
-        vocab = set([token for sequence in sequences for token in sequence])
-        index_to_word = dict()
-        index_to_word[0] = '<PAD>'
-        for word in vocab:
-            index_to_word[len(index_to_word)] = word
-        index_to_word[len(index_to_word)] = '<END>'
-        index_to_word[len(index_to_word)] = '<UNK>'
-        word_to_index = {v:k for k,v in index_to_word.items()}
-        return index_to_word, word_to_index, len(word_to_index)
+        with open('../model_files/prepros.pickle','rb') as f:
+            (index_to_word, word_to_index, vocab_size) = pickle.load(f)
+        return index_to_word, word_to_index, vocab_size
 
 
-DinoModel_obj = DinosaturdayModel()
+DinoModel_obj = DinosaturdayModel('../model_files/dinosad_gen_LSTM_final.h5')
 T047Model_obj = T047Model()
 MixModel_obj = MixModel()
 QuoteModel_obj = QuoteModel()
+DinoV2Model_obj = DinosaturdayModel('../model_files/dinosad_v2.h5')

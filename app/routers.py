@@ -4,11 +4,13 @@ from pydantic import BaseModel
 from enum import Enum
 from random import uniform
 
-from models import DinoModel_obj, T047Model_obj, MixModel_obj, QuoteModel_obj, DataTools
+from models import DinoModel_obj, T047Model_obj, MixModel_obj, QuoteModel_obj, DinoV2Model_obj, DataTools
+
 
 class PageEnum(str, Enum):
     t047 = 't047'
     dinosaturday = 'dinosaturday'
+    dinosaturdayv2 = 'dinosaturdayv2'
     mix = 'mix'
     quotes = 'quotes'
 
@@ -26,7 +28,7 @@ def get_sentence(start_text: str, page: PageEnum):
         if page == 'quotes':
             generated_text = DataTools.gen_sent(start_text, QuoteModel_obj)
         else:
-            model_dict = {'dinosaturday': DinoModel_obj, 't047': T047Model_obj, 'mix': MixModel_obj}
+            model_dict = {'dinosaturday': DinoModel_obj, 't047': T047Model_obj, 'mix': MixModel_obj, 'dinosaturdayv2': DinoV2Model_obj}
             temperature = round(uniform(1,2), 1)
             generated_text = DataTools.temperature_sampling_decode(start_text, 100, model_dict[page], temperature)
         return JSONResponse(content={'message': generated_text})
